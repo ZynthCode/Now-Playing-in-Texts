@@ -64,6 +64,28 @@ function meta_changed()
   update_files()
 end
 
+-- Read metadata to get description
+function read_np_metadata()
+  local np_metadata_path = vlc.config.userdatadir() .. "/np_metadata.txt"
+  local file = io.open(np_metadata_path, "r")
+  if file then
+      local content = file:read("*all")
+      file:close()
+      -- Extract the description
+      local description = string.match(content, "{description}:%s*(.-)\n")
+      if description then
+          return description
+      else
+          return "" -- Return an empty string if description is not found
+      end
+  else
+      print_debug("Could not open np_metadata.txt")
+      return ""
+  end
+end
+
+
+
 ----------------
 -- global values
 
@@ -148,6 +170,10 @@ function write_all_files()
   
   write_artwork()
   
+  local description = read_np_metadata()
+  if description then
+      write_file("description", description)
+  end
 end
 
 -- get metadata (safe)
